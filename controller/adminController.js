@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import asyncHandler from "express-async-handler";
 import User from "../model/userModel.js";
 
@@ -50,6 +51,34 @@ export const deleteUser = asyncHandler(async (req, res) => {
         success: true,
       });
     });
+  } catch (error) {
+    res.status(404);
+    throw new Error(error.message);
+  }
+});
+
+//change block status
+export const changeStatus = asyncHandler(async (req, res) => {
+  try {
+    // let Id = mongoose.Types.ObjectId(req.params.userId);
+    let Id = req.params.userId;
+
+    const changeBlockStaus = await User.findOneAndUpdate(
+       {_id:Id} ,
+      [{
+        $set: {
+          isBlocked: {
+            $cond: {
+              if: { $eq: ["$isBlocked", true] },
+              then: false,
+              else: true,
+            },
+          },
+        },
+      }],
+    );
+    // console.log(changeBlockStaus);
+    res.json(changeBlockStaus);
   } catch (error) {
     res.status(404);
     throw new Error(error.message);
